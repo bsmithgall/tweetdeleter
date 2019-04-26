@@ -31,7 +31,8 @@ OLDEST_TWEET_ALLOWED="numberInDays" # defaults to 30 days
 Then:
 
 ```
-npm start
+npm install
+npm run build
 ```
 
 Goodbye tweets.
