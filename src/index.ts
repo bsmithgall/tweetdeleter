@@ -1,20 +1,66 @@
-require('dotenv').config();
-import {ApiCredentials, AppConfiguration, getToken} from './auth';
-import {getDeleteCandidates, doTheDeletes} from './wire';
+#!/usr/bin/env node
 
-const credentials: ApiCredentials = {
-  key: <string>process.env.API_KEY,
-  secret: <string>process.env.API_SECRET,
-};
-const username = <string>process.env.USERNAME;
-const daysOld: number =
-  parseInt(<string>process.env.OLDEST_TWEET_ALLOWED, 10) || 30;
+import {ApiCredentials, AppConfiguration, getToken} from './auth';
+import {getDeleteCandidates, doTheDownload, doTheDeletes} from './wire';
+
+import program from 'commander';
 
 let configuration: AppConfiguration;
 
-getToken(credentials)
-  .then(token => {
-    configuration = {token: token, username: username, daysOld: daysOld};
-    return getDeleteCandidates(configuration, username);
-  })
-  .then(tweets => doTheDeletes(configuration, tweets));
+const command = program
+  .command('tweetdelete')
+  .option('-k, --key <key>', 'Twitter API Key')
+  .option('-s, --secret <secret>', 'Twitter API Secret')
+  .option('-u, --username <username>', 'User whose tweets you want to delete')
+  .option(
+    '-o, --oldest-tweet <oldestTweet>',
+    'Delete everything before',
+    parseInt,
+  )
+  .option(
+    '-d, --download-location [filePath]',
+    'Download a copy of the tweets before deleting them.',
+    './tweets.csv',
+  )
+  .option('--dry-run', "Do a dry run (don't actually delete the tweets)")
+
+function main(program: program.Command) {
+  program.parse(process.argv)
+
+  if (!program.key || !program.secret) {
+    console.error('No API Credentials provided!\n')
+    program.help()
+  }
+
+  const credentials: ApiCredentials = {
+    key: program.key,
+    secret: program.secret,
+  };
+
+  getToken(credentials)
+    .then(token => {
+      configuration = {
+        token: token,
+        username: program.username,
+        oldestTweet: program.oldestTweet,
+        downloadLocation: program.downloadLocation,
+        dryRun: program.dryRun as boolean,
+      };
+      return getDeleteCandidates(configuration);
+    })
+    .then(tweets => {
+      if (configuration.downloadLocation) {
+        doTheDownload(configuration, tweets);
+      }
+
+      return tweets;
+    })
+    .then(tweets => {
+      if (!configuration.dryRun) {
+        doTheDeletes(configuration, tweets);
+      }
+    });
+}
+
+main(command)
+

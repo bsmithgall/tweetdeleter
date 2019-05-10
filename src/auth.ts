@@ -14,8 +14,10 @@ export interface TwitterToken {
 
 export interface AppConfiguration {
   readonly token: TwitterToken;
-  readonly username: string
-  readonly daysOld: number
+  readonly username: string;
+  readonly oldestTweet: number;
+  readonly downloadLocation: string;
+  readonly dryRun: boolean;
 }
 
 function makeAuthentication(creds: ApiCredentials): string {
@@ -31,10 +33,10 @@ export async function getToken(creds: ApiCredentials): Promise<TwitterToken> {
     form: {
       grant_type: 'client_credentials',
     },
-    json: true
+    json: true,
   })
     .then((token: object) => {
-      console.log('Got access token for user')
+      console.log('Got access token for user');
       return token as TwitterToken;
     })
     .catch((error: any) => {

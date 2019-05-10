@@ -1,4 +1,6 @@
 import {AppConfiguration} from './auth';
+import fs from 'fs';
+import {Parser} from 'json2csv';
 import {deleteTweet} from './delete';
 import {getTimeline, Tweet} from './timeline';
 
@@ -13,7 +15,6 @@ function shouldDeleteTweet(tweet: Tweet, daysAgo: number): boolean {
 
 export async function getDeleteCandidates(
   config: AppConfiguration,
-  username: string,
 ): Promise<Array<Tweet>> {
   let deleteCandidates: Array<Tweet> = [];
   let maxId = undefined;
@@ -22,12 +23,12 @@ export async function getDeleteCandidates(
   while (tweetsScanned < MAX_TWEETS_ALLOWED) {
     const timelinePart: Array<Tweet> = await getTimeline(
       config.token,
-      username,
+      config.username,
       maxId,
     );
 
     timelinePart
-      .filter(t => shouldDeleteTweet(t, config.daysOld))
+      .filter(t => shouldDeleteTweet(t, config.oldestTweet))
       .forEach(t => deleteCandidates.push(t));
 
     maxId = Math.min(...timelinePart.map(t => t.id));
@@ -52,4 +53,21 @@ export async function doTheDeletes(
       }
     }),
   );
+}
+
+export async function doTheDownload(
+  config: AppConfiguration,
+  tweets: Array<Tweet>,
+) {
+  fs.access(config.downloadLocation, fileDoesNotExistErr => {
+    const writeStream = fs.createWriteStream(config.downloadLocation, {
+      encoding: 'utf8',
+    });
+
+    const csv = new Parser({
+      header: fileDoesNotExistErr !== null,
+    }).parse(tweets);
+
+    writeStream.write(csv);
+  });
 }
