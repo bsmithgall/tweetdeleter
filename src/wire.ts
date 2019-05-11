@@ -2,7 +2,7 @@ import {AppConfiguration} from './auth';
 import fs from 'fs';
 import {Parser} from 'json2csv';
 import {deleteTweet} from './delete';
-import {getTimeline, Tweet} from './timeline';
+import {TWEETS_AT_ONCE, getTimeline, Tweet} from './timeline';
 
 const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 const MAX_TWEETS_ALLOWED = 3200;
@@ -33,7 +33,7 @@ export async function getDeleteCandidates(
 
     maxId = Math.min(...timelinePart.map(t => t.id));
 
-    tweetsScanned += 200;
+    tweetsScanned += TWEETS_AT_ONCE;
   }
 
   return deleteCandidates;
@@ -46,7 +46,7 @@ export async function doTheDeletes(
   const printEvery = 500;
   let current = 0;
   candidates.forEach(c =>
-    deleteTweet(config.token, c).then(_ => {
+    deleteTweet(config.token, config.credentials, c).then(_ => {
       current += 1;
       if (current % printEvery === 0) {
         console.log(`Deleted ${current} successfully`);

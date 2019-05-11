@@ -5,6 +5,8 @@ const TOKEN_ENDPOINT = 'https://api.twitter.com/oauth2/token';
 export interface ApiCredentials {
   readonly key: string;
   readonly secret: string;
+  readonly token: string;
+  readonly tokenSecret: string;
 }
 
 export interface TwitterToken {
@@ -18,6 +20,7 @@ export interface AppConfiguration {
   readonly oldestTweet: number;
   readonly downloadLocation: string;
   readonly dryRun: boolean;
+  readonly credentials: ApiCredentials;
 }
 
 function makeAuthentication(creds: ApiCredentials): string {

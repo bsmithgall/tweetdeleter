@@ -1,12 +1,15 @@
 import {TwitterToken} from './auth';
 import {get} from 'request-promise';
 
+export const TWEETS_AT_ONCE = 200;
+
 const TIMELINE_ENDPOINT =
   'https://api.twitter.com/1.1/statuses/user_timeline.json';
 
 export interface Tweet {
   createdAt: Date;
   id: number;
+  id_str: string;
   user: number;
   text: string;
 }
@@ -15,6 +18,7 @@ interface JsonTweet {
   text: string;
   created_at: string;
   id: number;
+  id_str: string,
   user: {id: number};
 }
 
@@ -27,7 +31,7 @@ function makeRequestOptions(
     url: TIMELINE_ENDPOINT,
     qs: {
       screen_name: username,
-      count: 200,
+      count: TWEETS_AT_ONCE,
       include_rts: true,
       trim_user: true,
       // if we are passed a maxId, forward it into the
@@ -54,6 +58,7 @@ export async function getTimeline(
       return jsonTweets.map(t => ({
         createdAt: new Date(t.created_at),
         id: t.id,
+        id_str: t.id_str,
         user: t.user.id,
         text: t.text,
       }));

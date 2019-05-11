@@ -11,6 +11,8 @@ const command = program
   .command('tweetdelete')
   .option('-k, --key <key>', 'Twitter API Key')
   .option('-s, --secret <secret>', 'Twitter API Secret')
+  .option('-t, --token <token>', 'Twitter access token')
+  .option('-x, --token-secret <tokenSecret>', 'Twitter access token secret')
   .option('-u, --username <username>', 'User whose tweets you want to delete')
   .option(
     '-o, --oldest-tweet <oldestTweet>',
@@ -22,25 +24,28 @@ const command = program
     'Download a copy of the tweets before deleting them.',
     './tweets.csv',
   )
-  .option('--dry-run', "Do a dry run (don't actually delete the tweets)")
+  .option('--dry-run', "Do a dry run (don't actually delete the tweets)");
 
 function main(program: program.Command) {
-  program.parse(process.argv)
+  program.parse(process.argv);
 
   if (!program.key || !program.secret) {
-    console.error('No API Credentials provided!\n')
-    program.help()
+    console.error('No API Credentials provided!\n');
+    program.help();
   }
 
   const credentials: ApiCredentials = {
     key: program.key,
     secret: program.secret,
+    token: program.token,
+    tokenSecret: program.tokenSecret,
   };
 
   getToken(credentials)
     .then(token => {
       configuration = {
         token: token,
+        credentials: credentials,
         username: program.username,
         oldestTweet: program.oldestTweet,
         downloadLocation: program.downloadLocation,
@@ -62,5 +67,4 @@ function main(program: program.Command) {
     });
 }
 
-main(command)
-
+main(command);
