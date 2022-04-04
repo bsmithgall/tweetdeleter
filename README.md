@@ -17,8 +17,7 @@ Twitter lets you get your timeline in a batch of 200 tweets at a time, up to
 # I want to delete my tweets
 
 First, get a developer account on [twitter.com](https://developer.twitter.com).
-Then, make a new application. Make a file named `.env` in this directory (`touch
-.env` should do it). Open it up with your favorite text editor and make it look
+Then, make a new application. Make a file named `.env` in this directory (`touch .env` should do it). Open it up with your favorite text editor and make it look
 like this:
 
 ```bash
@@ -36,4 +35,3 @@ npm run build
 ```
 
 Goodbye tweets.
-
